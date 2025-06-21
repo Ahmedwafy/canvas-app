@@ -20,23 +20,17 @@ import { useCanvasStore } from "@/store/canvasStore";
 // };
 
 export const updateScale = () => {
-  const canvasWrapper = document.getElementById("canvas-wrapper");
+  const wrapper = document.getElementById("canvas-wrapper");
   const { customWidth, customHeight, setScale } = useCanvasStore.getState();
+  if (!wrapper) return;
 
-  if (!canvasWrapper) return;
-
-  const wrapperW = canvasWrapper.clientWidth;
-  const wrapperH = canvasWrapper.clientHeight;
-
-  // ✅ تأكد إن الـ wrapper ليه حجم فعلي
-  if (wrapperW < 100 || wrapperH < 100) {
-    setTimeout(updateScale, 50); // استنى لغاية ما يترندر كويس
+  const w = wrapper.clientWidth;
+  const h = wrapper.clientHeight;
+  if (w < 100 || h < 100) {
+    setTimeout(updateScale, 50);
     return;
   }
 
-  const scaleX = wrapperW / customWidth;
-  const scaleY = wrapperH / customHeight;
-
-  const finalScale = Math.min(scaleX, scaleY);
-  setScale(finalScale);
+  const final = Math.min(w / customWidth, h / customHeight);
+  setScale(final);
 };

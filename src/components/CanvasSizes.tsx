@@ -64,6 +64,7 @@ const CanvasSizeSelector = () => {
     requestAnimationFrame(() => {
       updateScale();
     });
+    canvas.requestRenderAll();
 
     // 📏 هل نعمل Fit to screen؟
     const screenW = window.innerWidth;

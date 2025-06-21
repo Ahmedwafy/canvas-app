@@ -435,27 +435,23 @@ export default function CanvasEditor() {
 
           <CanvasSizeSelector />
 
-          <div
-            id="canvas-wrapper"
-            className="flex-1 overflow-auto p-4 bg-gray-400"
-          >
+          <div id="canvas-wrapper" className="flex-1 overflow-auto p-4">
             <div
               style={{
                 width: canvasWidth + "px",
                 height: canvasHeight + "px",
                 transform: `scale(${scale})`,
                 transformOrigin: "top left",
-                margin: "0 auto",
               }}
             >
               <canvas
                 ref={canvasRef}
                 width={canvasWidth}
                 height={canvasHeight}
-                className="mx-auto my-0"
               />
             </div>
           </div>
+
           {/* <div
             id="canvas-wrapper"
             className="bg-gray-600 overflow-auto max-h-[80vh] rounded-lg p-2"

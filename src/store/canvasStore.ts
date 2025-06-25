@@ -23,6 +23,14 @@ export const useCanvasStore = create<CanvasStoreProps>((set, get) => ({
 
   isRestoring: false,
 
+  // grid lines
+  gridEnabled: false,
+  toggleGrid: () => set((state) => ({ gridEnabled: !state.gridEnabled })),
+
+  // Snap to grid
+  snapEnabled: false,
+  toggleSnap: () => set((state) => ({ snapEnabled: !state.snapEnabled })),
+
   // ----- Background color of the canvas ----- \\
   bgColor: "#075B5E",
   setBgColor: (color: string) => {
@@ -51,6 +59,27 @@ export const useCanvasStore = create<CanvasStoreProps>((set, get) => ({
   // ----- Clicked Shape on Canvas ----- \\
   layers: [],
   selectedLayerId: null, // ID of the currently selected layer
+
+  // Re-name layer in [ layer list - the Canvas ]
+  renameLayer: (id: string, newName: string) => {
+    set((state) => {
+      // Update layer name in layer list [left side bar]
+      const updatedLayers = state.layers.map((layer) =>
+        layer.id === id ? { ...layer, name: newName } : layer
+      );
+
+      // Update the name of Object.name in the Canvas it self
+      const canvas = state.canvas;
+      if (canvas) {
+        const object = canvas.getObjects().find((obj: any) => obj.id === id);
+        if (object) {
+          object.name = newName; // VIP
+        }
+      }
+
+      return { layers: updatedLayers };
+    });
+  },
 
   // ----- Selected Object ----- \\
   selectedObject: null,

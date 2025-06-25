@@ -15,14 +15,15 @@ import {
   disableFreeDrawing,
   safePushState,
   addStar,
+  EnableSnapToGrid,
+  drawGridLines,
 } from "@/utils/canvasUtils";
 import RightSideBar from "./RightSideBar";
 import { LeftSidebar } from "./LeftSideBar";
 import { FabricCanvasElement } from "@/types/canvas.types";
 import { updateLayers as updateLayersFromUtils } from "@/utils/canvasUtils";
 import VideoControls from "./ui/VideoControls";
-import CanvasSizeSelector from "@/components/CanvasSizes";
-import { updateScale } from "./UpdateScale";
+import ZoomControls from "./ui/ZoomControls";
 
 // to actually have the properties added to the serialized object
 FabricObject.customProperties = ["name", "id"];
@@ -30,9 +31,9 @@ FabricObject.customProperties = ["name", "id"];
 export default function CanvasEditor() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const { canvas, setCanvas } = useCanvasStore();
-  const canvasWidth = useCanvasStore((state) => state.customWidth);
-  const canvasHeight = useCanvasStore((state) => state.customHeight);
-  const scale = useCanvasStore((state) => state.scale);
+  // const customWidth = useCanvasStore((state) => state.customWidth);
+  // const customHeight = useCanvasStore((state) => state.customHeight);
+  // const scale = useCanvasStore((state) => state.scale);
 
   // change fill Color
   const fillColor = useCanvasStore.getState().fillColor;
@@ -62,7 +63,7 @@ export default function CanvasEditor() {
 
     // Save Canvas in Store
     setCanvas(fabricCanvas);
-    updateScale();
+    // updateScale();
 
     //  Get History From localStorage After Canvas Stored / Saved
     useCanvasStore.getState().restoreCanvasFromStorage();
@@ -117,7 +118,7 @@ export default function CanvasEditor() {
     }
   }, [setBgColor]);
 
-  // use canvas bg Color which come from Store
+  // use canvas bg Color which come from Storehttps://www.crazygames.com/game/slice-master
   useEffect(() => {
     if (canvas) {
       canvas.backgroundColor = bgColor;
@@ -382,16 +383,40 @@ export default function CanvasEditor() {
       }
     };
 
-    // اسمع للأحداث دي
+    // Listen to :
     canvas.on("selection:created", updateTextFromActive);
     canvas.on("selection:updated", updateTextFromActive);
 
-    // تنظيف عند إلغاء المكون أو تغيير canvas
+    // Clear after clear selection or change canvas
     return () => {
       canvas.off("selection:created", updateTextFromActive);
       canvas.off("selection:updated", updateTextFromActive);
     };
   }, [getCanvas, setText]);
+
+  // Snap to Grid
+  const snapEnabled = useCanvasStore.getState().snapEnabled;
+  useEffect(() => {
+    const canvas = useCanvasStore.getState().canvas;
+    if (canvas && snapEnabled) {
+      EnableSnapToGrid(canvas); // تقدر تغيّر الـ grid size هنا
+    }
+  }, [snapEnabled]);
+
+  // Grid Lines
+  const gridEnabled = useCanvasStore((state) => state.gridEnabled);
+  useEffect(() => {
+    if (!canvas) return;
+    if (gridEnabled) {
+      drawGridLines(canvas, 20);
+    } else {
+      const existingLines = canvas
+        .getObjects("line")
+        .filter((line) => (line as any).isGridLine);
+      existingLines.forEach((line) => canvas.remove(line));
+      canvas.requestRenderAll();
+    }
+  }, [canvas, gridEnabled]);
 
   return (
     <main>
@@ -410,7 +435,7 @@ export default function CanvasEditor() {
         <LeftSidebar />
 
         <div className="flex flex-col mx-auto w-full">
-          <div className="flex gap-2 bg-gray-300 rounded-lg p-2 my-2 shadow mx-auto">
+          <div className="flex gap-2 bg-gray-300 rounded-lg p-1 my-2 shadow mx-auto">
             <label className="text-sm font-bold text-center my-auto text-[#4B5563]">
               Canvas Background Color:
             </label>
@@ -418,11 +443,11 @@ export default function CanvasEditor() {
               type="color"
               value={bgColor}
               onChange={(e) => setBgColor(e.target.value)}
-              className=" p-1 rounded-lg bg-white text-sm shadow "
+              className=" p-1 rounded-lg bg-white text-sm shadow my-auto"
             />
             <input
               type="text"
-              className="rounded-lg px-1 shadow"
+              className="rounded-lg px-1 shadow my-auto"
               value={bgColor}
               onChange={(e) => {
                 const CanvasColor = e.target.value;
@@ -431,51 +456,12 @@ export default function CanvasEditor() {
                 }
               }}
             />
+            <ZoomControls />
           </div>
 
-          <CanvasSizeSelector />
-
-          <div id="canvas-wrapper" className="flex-1 overflow-auto p-4">
-            <div
-              style={{
-                width: canvasWidth + "px",
-                height: canvasHeight + "px",
-                transform: `scale(${scale})`,
-                transformOrigin: "top left",
-              }}
-            >
-              <canvas
-                ref={canvasRef}
-                width={canvasWidth}
-                height={canvasHeight}
-              />
-            </div>
+          <div className="bg-gray-400 h-[84vh] w-full">
+            <canvas ref={canvasRef} className="rounded-0 h-[84vh] w-full" />
           </div>
-
-          {/* <div
-            id="canvas-wrapper"
-            className="bg-gray-600 overflow-auto max-h-[80vh] rounded-lg p-2"
-          >
-            <div
-              style={{
-                width: `${canvasWidth}px`,
-                height: `${canvasHeight}px`,
-                transform: `scale(${scale})`,
-                transformOrigin: "top left",
-              }}
-            >
-              <canvas
-                ref={canvasRef}
-                width={canvasWidth}
-                height={canvasHeight}
-                style={{ display: "block" }}
-              />
-            </div>
-          </div> */}
-
-          {/* <div className="bg-gray-400 w-full h-[80vh]">
-            <canvas ref={canvasRef} className="rounded-0" />
-          </div> */}
           <VideoControls />
         </div>
 

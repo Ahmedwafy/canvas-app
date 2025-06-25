@@ -18,7 +18,6 @@ import {
   Point,
 } from "fabric";
 import jsPDF from "jspdf";
-// import * as fabric from "fabric";
 
 // Monkey Patching for toObject in fabricJS
 // Add id / type for all fabric object when :
@@ -66,7 +65,9 @@ type FabricObjectWithId = FabricObject & {
 // Update the layers List based on the Fabric objects in the Canvas
 export const updateLayers = (canvas: Canvas) => {
   const setLayers = useCanvasStore.getState().setLayers;
-  const objects = canvas.getObjects();
+
+  // ✅ فلترة خطوط الشبكة
+  const objects = canvas.getObjects().filter((obj) => !(obj as any).isGridLine); // ← دي أهم سطر
 
   const newLayers: Layer[] = objects.map((obj, index) => {
     const o = obj as FabricObjectWithId;
@@ -76,7 +77,6 @@ export const updateLayers = (canvas: Canvas) => {
       name: o.name ?? `${o.type} ${index}`,
       type: o.type,
       visible: o.visible,
-      // add metadata if needed
     };
   });
 
@@ -1054,4 +1054,105 @@ export const toggleLock = (object: FabricObject, canvas: Canvas) => {
 
   // 6. Update the layers list (e.g., sidebar UI via Zustand store)
   updateLayers(canvas);
+};
+
+// ======================  Snap to grid  ====================== //
+const handleObjectMoving = (e: { target: FabricObject }) => {
+  const obj = e.target;
+  if (!obj || !useCanvasStore.getState().snapEnabled) return;
+
+  const gridSize = 20;
+  obj.set({
+    left: Math.round((obj.left ?? 0) / gridSize) * gridSize,
+    top: Math.round((obj.top ?? 0) / gridSize) * gridSize,
+  });
+};
+
+const handleObjectScaling = (e: { target: FabricObject }) => {
+  const obj = e.target;
+  if (!obj || !useCanvasStore.getState().snapEnabled) return;
+
+  const gridSize = 20;
+  obj.set({
+    left: Math.round((obj.left ?? 0) / gridSize) * gridSize,
+    top: Math.round((obj.top ?? 0) / gridSize) * gridSize,
+  });
+};
+
+export const EnableSnapToGrid = (canvas: Canvas) => {
+  // const gridSize = 20;
+  if (!canvas) return;
+
+  // ✅ امسح أي listeners قديمة قبل تضيف جديد
+  canvas.off("object:moving", handleObjectMoving);
+  canvas.off("object:scaling", handleObjectScaling);
+
+  canvas.on("object:moving", handleObjectMoving);
+  canvas.on("object:scaling", handleObjectScaling);
+};
+
+// ======================  Draw Grid Lines  ====================== //
+export const drawGridLines = (
+  canvas: Canvas,
+  gridSize: number = 20,
+  color: string = "#eee"
+) => {
+  const width = canvas.getWidth();
+  const height = canvas.getHeight();
+
+  // Remove old grid lines
+  const existingLines = canvas
+    .getObjects("line")
+    .filter((line) => (line as any).isGridLine);
+  existingLines.forEach((line) => canvas.remove(line));
+
+  // Helper to create line
+  const createGridLine = (points: [number, number, number, number]) =>
+    new Line(points, {
+      stroke: color,
+      strokeWidth: 1,
+      selectable: false,
+      evented: false,
+      excludeFromExport: true,
+      hoverCursor: "default",
+    });
+
+  // Vertical Lines
+  for (let x = 0; x <= width; x += gridSize) {
+    const vertical = createGridLine([x, 0, x, height]);
+    (vertical as any).isGridLine = true;
+    canvas.add(vertical);
+    (vertical as any).sendToBack?.();
+  }
+
+  // Horizontal Lines
+  for (let y = 0; y <= height; y += gridSize) {
+    const horizontal = createGridLine([0, y, width, y]);
+    (horizontal as any).isGridLine = true;
+    canvas.add(horizontal);
+    (horizontal as any).sendToBack?.();
+  }
+
+  canvas.requestRenderAll();
+};
+
+// ======================  Zoom in / out / resset  ====================== //
+export const zoomIn = (canvas: Canvas, step = 0.1, max = 3) => {
+  if (!canvas) return;
+  const zoom = canvas.getZoom();
+  const newZoom = Math.min(zoom + step, max);
+  canvas.zoomToPoint(
+    new Point(canvas.getWidth() / 2, canvas.getHeight() / 2),
+    newZoom
+  );
+};
+
+export const zoomOut = (canvas: Canvas, step = 0.1, min = 0.2) => {
+  if (!canvas) return;
+  const zoom = canvas.getZoom();
+  const newZoom = Math.max(zoom - step, min);
+  canvas.zoomToPoint(
+    new Point(canvas.getWidth() / 2, canvas.getHeight() / 2),
+    newZoom
+  );
 };

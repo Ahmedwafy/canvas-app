@@ -78,6 +78,16 @@ export interface CanvasStoreProps {
   canvas: Canvas | null;
   setCanvas: (canvas: Canvas | null) => void;
 
+  renameLayer: (id: string, newName: string) => void;
+
+  // grid lines
+  gridEnabled: boolean;
+  toggleGrid: () => void;
+
+  // snap to grid
+  snapEnabled: boolean;
+  toggleSnap: () => void;
+
   customWidth: number;
   customHeight: number;
   setCustomSize: (width: number, height: number) => void;

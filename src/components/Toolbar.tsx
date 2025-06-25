@@ -26,6 +26,8 @@ import {
 import Alignment from "./Alignment";
 import { addEmptyShape, updateLayers } from "@/utils/canvasUtils";
 import GroupControls from "./GroupControls";
+import { SnapToggleButton } from "./ui/SnapToggleButton ";
+import ShowGridButton from "./ui/ShowGridButton";
 
 export default function Toolbar({
   brushWidth,
@@ -203,6 +205,8 @@ export default function Toolbar({
         </Popover>
 
         <GroupControls />
+        <ShowGridButton />
+        <SnapToggleButton />
       </section>
 
       {/* Text Settings */}

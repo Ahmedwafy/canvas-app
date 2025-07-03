@@ -71,5 +71,5 @@ export class FabricVideo extends FabricObject {
   }
 }
 
-// ✅ تسجيل الكلاس
+// Register the class with Fabric.js
 classRegistry.setClass(FabricVideo, "video");

@@ -2,18 +2,19 @@ import type { Metadata } from "next";
 import { Inter, Roboto, Courier_Prime } from "next/font/google";
 import "./globals.css";
 
-export const inter = Inter({
+const inter = Inter({
   subsets: ["latin"],
+  weight: ["400", "700"],
   variable: "--font-inter",
 });
 
-export const roboto = Roboto({
+const roboto = Roboto({
   subsets: ["latin"],
   weight: ["400", "700"],
   variable: "--font-roboto",
 });
 
-export const courier = Courier_Prime({
+const courier = Courier_Prime({
   subsets: ["latin"],
   weight: ["400", "700"],
   variable: "--font-courier",

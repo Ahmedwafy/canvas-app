@@ -26,9 +26,9 @@ import * as fabric from "fabric";
 // or object.toObject();
 // مرتبط جدًا ومهم جدًا بموضوع قفل/فك العناصر، وحفظ الحالة واسترجاعها بعد الرفرش.
 FabricObject.prototype.toObject = (function (toObject) {
-  return function (this: FabricObject, ...args: any[0]) {
+  return function (this: FabricObject, ...args: any[]) {
     return {
-      ...toObject.apply(this, args[0]),
+      ...toObject.call(this, args[0]),
       id: this.id,
       name: this.name,
       type: this.type,

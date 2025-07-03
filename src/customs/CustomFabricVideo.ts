@@ -62,7 +62,7 @@ export class FabricVideo extends FabricObject {
   }
 
   // Convert JSON into Objects [fromObject()]
-  static async fromObject(object: any, _options?: any): Promise<FabricVideo> {
+  static async fromObject(object: any): Promise<FabricVideo> {
     const videoURL = await getVideoBlobURL(object.id);
     if (!videoURL) throw new Error("Video not found in IndexedDB");
 

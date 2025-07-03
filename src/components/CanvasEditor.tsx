@@ -31,11 +31,8 @@ FabricObject.customProperties = ["name", "id"];
 export default function CanvasEditor() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const { canvas, setCanvas } = useCanvasStore();
-  // const customWidth = useCanvasStore((state) => state.customWidth);
-  // const customHeight = useCanvasStore((state) => state.customHeight);
-  // const scale = useCanvasStore((state) => state.scale);
 
-  // change fill Color
+  // ====== change fill Color ======
   const fillColor = useCanvasStore.getState().fillColor;
 
   // ====== Canvas Bg Color from Store ====== \\
@@ -404,19 +401,40 @@ export default function CanvasEditor() {
   }, [snapEnabled]);
 
   // Grid Lines
+  // Grid Lines
   const gridEnabled = useCanvasStore((state) => state.gridEnabled);
   useEffect(() => {
     if (!canvas) return;
+
     if (gridEnabled) {
       drawGridLines(canvas, 20);
     } else {
       const existingLines = canvas
         .getObjects("line")
-        .filter((line) => (line as any).isGridLine);
+        .filter(
+          (line) =>
+            (line as unknown as fabric.Line & { isGridLine?: boolean })
+              .isGridLine
+        );
+
       existingLines.forEach((line) => canvas.remove(line));
       canvas.requestRenderAll();
     }
   }, [canvas, gridEnabled]);
+
+  // const gridEnabled = useCanvasStore((state) => state.gridEnabled);
+  // useEffect(() => {
+  //   if (!canvas) return;
+  //   if (gridEnabled) {
+  //     drawGridLines(canvas, 20);
+  //   } else {
+  //     const existingLines = canvas
+  //       .getObjects("line")
+  //       .filter((line) => (line as any).isGridLine);
+  //     existingLines.forEach((line) => canvas.remove(line));
+  //     canvas.requestRenderAll();
+  //   }
+  // }, [canvas, gridEnabled]);
 
   return (
     <main>

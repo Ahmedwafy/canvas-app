@@ -23,7 +23,7 @@ export async function saveVideoBlob(videoId: string, file: File) {
   const tx = db.transaction(STORE_NAME, "readwrite");
   const store = tx.objectStore(STORE_NAME);
   store.put(file, videoId);
-  await tx.done;
+  // await tx.done;
 }
 
 export async function getVideoBlobURL(videoId: string): Promise<string | null> {

@@ -18,6 +18,7 @@ import {
   Point,
 } from "fabric";
 import jsPDF from "jspdf";
+import * as fabric from "fabric";
 
 // Monkey Patching for toObject in fabricJS
 // Add id / type for all fabric object when :
@@ -27,7 +28,7 @@ import jsPDF from "jspdf";
 FabricObject.prototype.toObject = (function (toObject) {
   return function (this: FabricObject, ...args: any[]) {
     return {
-      ...toObject.apply(this, args),
+      ...toObject.apply(this, args[0]),
       id: this.id,
       name: this.name,
       type: this.type,
